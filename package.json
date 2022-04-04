@@ -1,10 +1,12 @@
 {
-	"name": "directus-extension-fixtable-interface",
+	"name": "directus-extension-fixtable",
 	"version": "1.0.0",
 	"keywords": [
 		"directus",
 		"directus-extension",
-		"directus-custom-interface"
+		"directus-custom-interface",
+    "directus-extension-fixtable",
+    "fixtable"
 	],
 	"directus:extension": {
 		"type": "interface",
@@ -13,7 +15,8 @@
 		"host": "^9.5.2"
 	},
 	"scripts": {
-		"build": "directus-extension build --watch"
+		"build": "directus-extension build",
+    "start": "directus-extension build --watch"
 	},
 	"devDependencies": {
 		"@directus/extensions-sdk": "9.5.2",
