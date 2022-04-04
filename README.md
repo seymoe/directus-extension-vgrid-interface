@@ -16,7 +16,7 @@ Restart directus
 
 To use this custom interface into a data model, you have to:
 
-![](https://github.com/seymoe/directus-extension-fixtable-interface/master/screenshot.png)
+![](https://raw.githubusercontent.com/seymoe/directus-extension-fixtable-interface/master/screenshot.png)
 
 - Add a simple field with **JSON** type
 - Config default value and columns
