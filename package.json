@@ -1,0 +1,25 @@
+{
+	"name": "directus-extension-fixtable-interface",
+	"version": "1.0.0",
+	"keywords": [
+		"directus",
+		"directus-extension",
+		"directus-custom-interface"
+	],
+	"directus:extension": {
+		"type": "interface",
+		"path": "index.js",
+		"source": "src/index.js",
+		"host": "^9.5.2"
+	},
+	"scripts": {
+		"build": "directus-extension build --watch"
+	},
+	"devDependencies": {
+		"@directus/extensions-sdk": "9.5.2",
+		"vue": "^3.2.29"
+	},
+	"dependencies": {
+		"@revolist/vue3-datagrid": "^3.0.97"
+	}
+}
