@@ -16,10 +16,8 @@ Restart directus
 
 To use this custom interface into a data model, you have to:
 
-![](https://raw.githubusercontent.com/seymoe/directus-extension-vgrid-interface/master/screenshot.png)
-
 - Add a simple field with **JSON** type
-- Config default value and columns
+- Config default columns
 - Enjoy ! 🎉
 
 ### Example columns
