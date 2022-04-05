@@ -1,13 +1,13 @@
-# FixTable - Directus extension
+# Data Grid - Directus extension
 
-A directus extension with `@revolist/vue3-datagrid`, specify fixed rows and columns to generate an editable table field.
+A directus extension with `@revolist/vue3-datagrid`, specify fixed columns to generate an editable table field.
 
 ## Installation
 
 In your Directus installation root
 
 ```
-npm install directus-extension-fixtable
+npm install directus-extension-vgrid
 ```
 
 Restart directus
@@ -16,22 +16,11 @@ Restart directus
 
 To use this custom interface into a data model, you have to:
 
-![](https://raw.githubusercontent.com/seymoe/directus-extension-fixtable-interface/master/screenshot.png)
+![](https://raw.githubusercontent.com/seymoe/directus-extension-vgrid-interface/master/screenshot.png)
 
 - Add a simple field with **JSON** type
 - Config default value and columns
 - Enjoy ! 🎉
-
-### Example default value
-
-```json
-[
-  {
-    "time": 2022,
-    "power": 0
-  }
-]
-```
 
 ### Example columns
 
@@ -43,7 +32,8 @@ To use this custom interface into a data model, you have to:
   },
   {
     "prop": "power",
-    "name": "Power"
+    "name": "Power",
+    "columnType": "numeric"
   }
 ]
 ```

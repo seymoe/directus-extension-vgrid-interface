@@ -1,10 +1,10 @@
 import InterfaceComponent from './interface.vue'
 
 export default {
-	id: 'extension-fixtable',
-	name: 'FixTable',
+	id: 'interface-datagrid',
+	name: 'Data Grid',
 	icon: 'open_in_new',
-	description: 'Specify fixed rows and columns to generate an editable table field.',
+	description: 'Specify fixed columns to generate an editable table field.',
 	component: InterfaceComponent,
 	group: 'standard',
 	types: ['json'],
@@ -27,7 +27,8 @@ export default {
               },
               {
                 prop: 'power',
-                name: 'Column Name'
+                name: 'Column Name',
+                columnType: 'numeric'
               }
             ], null, 2)
           }
