@@ -14,6 +14,7 @@
         :columnTypes="columnTypes"
         @beforeeditstart="onBeforeEditStart"
         @focusout="onAfterEdit"
+        @beforeaange="onBeforeRange"
       ></v-grid>
     </div>
   </div>
@@ -131,6 +132,14 @@ export default defineComponent({
       emit('input', JSON.stringify(viewData))
     }
 
+    async function onBeforeRange(e) {
+      let viewData = await vgrid.value.$el.getVisibleSource()
+      viewData.forEach(row => {
+        delete row.$$_action
+      })
+      emit('input', JSON.stringify(viewData))
+    }
+
     const addRow = () => {
       const o = {}
       columnList.value.forEach(column => {
@@ -139,7 +148,7 @@ export default defineComponent({
       dataList.value.push(o)
       emit('input', JSON.stringify(dataList.value))
     }
-		return { columnTypes, dataList, columnList, vgrid, onBeforeEditStart, onAfterEdit, addRow };
+		return { columnTypes, dataList, columnList, vgrid, onBeforeEditStart, onAfterEdit, onBeforeRange, addRow };
 	}
 });
 </script>
