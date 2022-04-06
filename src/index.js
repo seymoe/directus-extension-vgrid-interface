@@ -34,7 +34,46 @@ export default {
           }
         }
 			],
-      advanced: []
+      advanced: [
+        {
+          field: 'renderChart',
+          name: 'Show Chart',
+          type: 'boolean',
+          meta: {
+            width: 'half',
+            interface: 'boolean'
+          },
+          schema: {
+            default_value: false
+          }
+        },
+        {
+          field: 'chartOptions',
+          name: 'Chart Options',
+          type: 'json',
+          meta: {
+            width: 'full',
+            interface: 'input-code'
+          },
+          schema: {
+            default_value: JSON.stringify({
+              chart: {
+                height: 350
+              },
+              series: [
+                {
+                  name: 'SERIES NAME',
+                  dataKey: 'power',
+                  type: 'line'
+                }
+              ],
+              xaxis: {
+                categoryKey: 'time'
+              }
+            }, null, 4)
+          }
+        }
+      ]
 		};
     if (field?.type === 'json') {
 			return jsonOptions
