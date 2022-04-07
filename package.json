@@ -1,6 +1,15 @@
 {
-	"name": "directus-extension-vgrid",
-	"version": "1.0.5",
+	"name": "directus-extension-vgrid-interface",
+	"version": "1.0.6",
+  "author": {
+    "name": "seymoe",
+    "email": "seymoe@yeah.net",
+    "url": "https://github.com/seymoe"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seymoe/directus-extension-vgrid-interface"
+  },
 	"keywords": [
 		"directus",
 		"directus-extension",
@@ -26,5 +35,6 @@
 		"@revolist/revogrid-column-numeral": "^1.0.2",
 		"@revolist/vue3-datagrid": "^3.0.97",
 		"apexcharts": "^3.35.0"
-	}
+	},
+  "license": "MIT"
 }
