@@ -69,6 +69,9 @@ export default {
               ],
               xaxis: {
                 categoryKey: 'time'
+              },
+              yaxis: {
+                min: 0
               }
             }, null, 4)
           }
