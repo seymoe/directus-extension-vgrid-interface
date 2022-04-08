@@ -7,7 +7,7 @@ A directus extension with `@revolist/vue3-datagrid`, specify fixed columns to ge
 In your Directus installation root
 
 ```
-npm install directus-extension-vgrid
+npm install directus-extension-vgrid-interface
 ```
 
 Restart directus
