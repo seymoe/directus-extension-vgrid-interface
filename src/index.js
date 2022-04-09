@@ -36,6 +36,30 @@ export default {
 			],
       advanced: [
         {
+          field: 'tableHeight',
+          name: 'Table Height',
+          type: 'integer',
+          meta: {
+            width: 'half',
+            interface: 'input',
+            options: {
+              placeholder: 'Please enter table height',
+            }
+          }
+        },
+        {
+          field: 'fixedTable',
+          name: 'Fixed Table',
+          type: 'boolean',
+          meta: {
+            width: 'half',
+            interface: 'boolean'
+          },
+          schema: {
+            default_value: false
+          }
+        },
+        {
           field: 'renderChart',
           name: 'Show Chart',
           type: 'boolean',

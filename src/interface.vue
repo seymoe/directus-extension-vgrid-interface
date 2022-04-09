@@ -1,9 +1,9 @@
 <template>
 	<div class="extension-fixtable-wrapper">
-    <div class="toolbar">
+    <div class="toolbar" v-if="!fixedTable">
       <v-button @click="addRow">Add Row</v-button>
     </div>
-    <div class="table-wrap">
+    <div class="table-wrap" :style="{height: `${tableHeight}px`}">
       <v-grid
         ref="vgrid"
         range
@@ -54,6 +54,14 @@ export default defineComponent({
       type: String,
       default: ''
     },
+    tableHeight: {
+      type: Number,
+      default: 300
+    },
+    fixedTable: {
+      type: Boolean,
+      default: false
+    },
     renderChart: {
       type: Boolean,
       default: false
@@ -70,7 +78,6 @@ export default defineComponent({
   },
 	emits: ['input'],
 	setup(props, {emit}) {
-    console.log(props.field, ':', props)
     // 列数据
     const columnList = ref([])
     // 行数据
@@ -91,8 +98,8 @@ export default defineComponent({
 
     watch(() => props.columns,
       (val) => {
-        // 添加内置列
-        if (!val.find(item => item.prop === '$$_action')) {
+        // 如果 props.fixedTable 为 false，则添加内置列
+        if (!props.fixedTable && !val.find(item => item.prop === '$$_action')) {
           val.push({
             prop: '$$_action',
             name: 'Actions',
@@ -150,7 +157,6 @@ export default defineComponent({
     }
 
     async function onAfterEdit(e) {
-      console.log('FixTable: afterEdit', e, dataList.value)
       let viewData = await vgrid.value.$el.getVisibleSource()
       let value = e.target.value
       const _column = columnList.value.find(item => item.prop === gColName.value)
@@ -158,7 +164,6 @@ export default defineComponent({
         value = parseFloat(value)
       }
       viewData[gRowIndex.value][gColName.value] = value
-      console.log(viewData)
       viewData.forEach(row => {
         delete row.$$_action
       })
@@ -227,10 +232,8 @@ export default defineComponent({
       // if (chart.value) chart.value?.destroy()
       nextTick(() => {
         if (chart.value) {
-          console.log('图表更新', options)
           chart.value.updateOptions(options)
         } else {
-          console.log('图表创建', options)
           chart.value = new ApexCharts(chartEl.value, options)
           chart.value.render()
         }
@@ -241,7 +244,6 @@ export default defineComponent({
       setupChart(props.chartOptions)
     })
     onUnmounted(() => {
-      console.log('组件卸载了', chart.value, chartEl)
 			chart.value?.destroy()
 		})
 
