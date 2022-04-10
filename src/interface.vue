@@ -31,6 +31,7 @@ import VGrid from '@revolist/vue3-datagrid'
 import ApexCharts from 'apexcharts'
 import NumberColumnType from '@revolist/revogrid-column-numeral'
 import numeral from 'numeral'
+import Papa from 'papaparse'
 // import SelectTypePlugin from '@revolist/revogrid-column-select'
 // import DateTypePlugin from '@revolist/revogrid-column-date'
 
@@ -78,68 +79,105 @@ export default defineComponent({
   },
 	emits: ['input'],
 	setup(props, {emit}) {
-    // 列数据
+    // column data
     const columnList = ref([])
-    // 行数据
+    // row data
     const dataList = ref([])
-    // 表格实例
+    // table ref
     let vgrid = ref()
-    // 当前行索引
+    // current row index
     let gRowIndex = ref(0)
-    // 当前列名称
+    // current column name
     let gColName = ref('')
     // 表格配置cell类型插件
     const columnTypes = ref({
       'numeric': new NumberColumnType('0,0')
     })
-    // 表格
+    // charts
     const chartEl = ref()
     const chart = ref()
 
-    watch(() => props.columns,
-      (val) => {
-        // 如果 props.fixedTable 为 false，则添加内置列
-        if (!props.fixedTable && !val.find(item => item.prop === '$$_action')) {
-          val.push({
-            prop: '$$_action',
-            name: 'Actions',
-            pin: 'colPinEnd',
-            cellTemplate: (createElement, _props) => {
-              return createElement('span', {
-                style: {
-                  color: 'red'
-                },
-                onClick: () => {
-                  let rows = dataList.value
-                  rows.splice(_props.rowIndex, 1)
-                  rows.forEach(row => {
-                    delete row.$$_action
-                  })
-                  emit('input', JSON.stringify(rows))
-                }
-              }, 'Remove');
+    if (props.type === 'json') {
+      watch(() => props.columns,
+        (val) => {
+          // 如果 props.fixedTable 为 false，则添加内置列
+          if (!props.fixedTable && !val.find(item => item.prop === '$$_action')) {
+            val.push({
+              prop: '$$_action',
+              name: 'Actions',
+              pin: 'colPinEnd',
+              cellTemplate: (createElement, _props) => {
+                return createElement('span', {
+                  style: {
+                    color: 'red'
+                  },
+                  onClick: () => {
+                    let rows = dataList.value
+                    rows.splice(_props.rowIndex, 1)
+                    rows.forEach(row => {
+                      delete row.$$_action
+                    })
+                    emitTableData(rows)
+                  }
+                }, 'Remove');
+              }
+            })
+          }
+          columnList.value = val.map(c => {
+            if (c.columnType === 'numeric' && c.format) {
+              c.cellTemplate = (createElement, _props) => {
+                return createElement('span', {}, numeral(_props.model[_props.prop]).format(c.format));
+              }
+            }
+            return {
+              ...c,
+              autoSize: true
             }
           })
-        }
-        columnList.value = val.map(c => {
-          if (c.columnType === 'numeric' && c.format) {
-            c.cellTemplate = (createElement, _props) => {
-              return createElement('span', {}, numeral(_props.model[_props.prop]).format(c.format));
-            }
-          }
-          return {
-            ...c,
-            autoSize: true
-          }
-        })
-      },
-      { immediate: true }
-    )
+        },
+        { immediate: true }
+      )
+    }
+
     watch(() => props.value,
       (val) => {
-        if (typeof val === 'string') {
+        if (props.type === 'text' && typeof val === 'string') {
           try {
-            dataList.value = JSON.parse(val)
+            const { data, meta } = Papa.parse(val, {header: true, skipEmptyLines: true})
+            if (meta?.fields.length) {
+              const columns = meta.fields.map(field => {
+                return {
+                  prop: field,
+                  name: field,
+                  autoSize: true
+                }
+              })
+              // 如果 props.fixedTable 为 false，则添加内置列
+              if (!props.fixedTable && !columns.find(item => item.prop === '$$_action')) {
+                columns.push({
+                  prop: '$$_action',
+                  name: 'Actions',
+                  pin: 'colPinEnd',
+                  cellTemplate: (createElement, _props) => {
+                    return createElement('span', {
+                      style: {
+                        color: 'red'
+                      },
+                      onClick: () => {
+                        let rows = dataList.value
+                        rows.splice(_props.rowIndex, 1)
+                        rows.forEach(row => {
+                          delete row.$$_action
+                        })
+                        emitTableData(rows)
+                      }
+                    }, 'Remove');
+                  }
+                })
+              }
+              columnList.value = columns
+            }
+            dataList.value = data || []
           } catch (err) {
             console.log(err)
           }
@@ -151,11 +189,11 @@ export default defineComponent({
       { immediate: true, deep: true }
     )
 
+    // table callbacks
     const onBeforeEditStart = (e) => {
       gRowIndex.value = e.detail.rowIndex
       gColName.value = e.detail.prop
     }
-
     async function onAfterEdit(e) {
       let viewData = await vgrid.value.$el.getVisibleSource()
       let value = e.target.value
@@ -167,27 +205,35 @@ export default defineComponent({
       viewData.forEach(row => {
         delete row.$$_action
       })
-      emit('input', JSON.stringify(viewData))
+      emitTableData(viewData)
     }
-
     async function onBeforeRange(e) {
       let viewData = await vgrid.value.$el.getVisibleSource()
       viewData.forEach(row => {
         delete row.$$_action
       })
-      emit('input', JSON.stringify(viewData))
+      emitTableData(viewData)
     }
-
-    const addRow = () => {
+    function addRow() {
       const o = {}
       columnList.value.forEach(column => {
         o[column.prop] = column.columnType === 'numeric' ? 0 : ''
       })
       dataList.value.push(o)
-      emit('input', JSON.stringify(dataList.value))
+      emitTableData(dataList.value)
     }
 
-    // 表格相关
+    // update table data
+    function emitTableData(data) {
+      if (props.type === 'json') {
+        emit('input', JSON.stringify(data))
+      } else if (props.type === 'text') {
+        const csv = Papa.unparse(data, { header: true, skipEmptyLines: true })
+        emit('input', csv)
+      }
+    }
+
+    // chart methods
     function setupChart(opt = {}) {
       if (!props.renderChart) return
       const { series, xaxis, yaxis } = opt
