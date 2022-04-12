@@ -141,45 +141,54 @@ export default defineComponent({
 
     watch(() => props.value,
       (val) => {
-        if (props.type === 'text' && typeof val === 'string') {
-          try {
-            const { data, meta } = Papa.parse(val, {header: true, skipEmptyLines: true})
-            if (meta?.fields.length) {
-              const columns = meta.fields.map(field => {
-                return {
-                  prop: field,
-                  name: field,
-                  autoSize: true
-                }
-              })
-              // 如果 props.fixedTable 为 false，则添加内置列
-              if (!props.fixedTable && !columns.find(item => item.prop === '$$_action')) {
-                columns.push({
-                  prop: '$$_action',
-                  name: 'Actions',
-                  pin: 'colPinEnd',
-                  cellTemplate: (createElement, _props) => {
-                    return createElement('span', {
-                      style: {
-                        color: 'red'
-                      },
-                      onClick: () => {
-                        let rows = dataList.value
-                        rows.splice(_props.rowIndex, 1)
-                        rows.forEach(row => {
-                          delete row.$$_action
-                        })
-                        emitTableData(rows)
-                      }
-                    }, 'Remove');
+        if (typeof val === 'string') {
+          if (props.type === 'text') {
+            try {
+              const { data, meta } = Papa.parse(val, {header: true, skipEmptyLines: true})
+              if (meta?.fields.length) {
+                const columns = meta.fields.map(field => {
+                  return {
+                    prop: field,
+                    name: field,
+                    autoSize: true
                   }
                 })
+                // 如果 props.fixedTable 为 false，则添加内置列
+                if (!props.fixedTable && !columns.find(item => item.prop === '$$_action')) {
+                  columns.push({
+                    prop: '$$_action',
+                    name: 'Actions',
+                    pin: 'colPinEnd',
+                    cellTemplate: (createElement, _props) => {
+                      return createElement('span', {
+                        style: {
+                          color: 'red'
+                        },
+                        onClick: () => {
+                          let rows = dataList.value
+                          rows.splice(_props.rowIndex, 1)
+                          rows.forEach(row => {
+                            delete row.$$_action
+                          })
+                          emitTableData(rows)
+                        }
+                      }, 'Remove');
+                    }
+                  })
+                }
+                columnList.value = columns
               }
-              columnList.value = columns
+              dataList.value = data || []
+            } catch (err) {
+              console.log(err)
             }
-            dataList.value = data || []
-          } catch (err) {
-            console.log(err)
+          } else if (props.type === 'json') {
+            try {
+              const list = JSON.parse(val)
+              dataList.value = list || []
+            } catch (err) {
+              console.log(err)
+            }
           }
         } else {
           dataList.value = val === null ? [] : val
@@ -262,20 +271,6 @@ export default defineComponent({
           categories: dataList.value.map(row => row[xaxis.categoryKey])
         }
       }
-      // if (Array.isArray(yaxis)) {
-      //   options.yaxis = yaxis.map((item, index) => {
-      //     const o = {
-      //       title: {
-      //         text: item
-      //       }
-      //     }
-      //     if (index > 0) {
-      //       o.opposite = true
-      //     }
-      //     return o
-      //   })
-      // }
-      // if (chart.value) chart.value?.destroy()
       nextTick(() => {
         if (chart.value) {
           chart.value.updateOptions(options)

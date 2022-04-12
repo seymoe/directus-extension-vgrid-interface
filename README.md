@@ -16,11 +16,11 @@ Restart directus
 
 To use this custom interface into a data model, you have to:
 
-- Add a simple field with **JSON** type
-- Config default columns
+- Add a simple field with **JSON** type or select **Text** type
+- you have to config default columns when you choose json type, and you have to config the default value(csv) when you choose text type.
 - Enjoy ! 🎉
 
-### Example columns
+### Json type Example columns
 
 ```json
 [
@@ -34,6 +34,12 @@ To use this custom interface into a data model, you have to:
     "columnType": "numeric"
   }
 ]
+```
+
+### Text type CSV
+```
+time,power
+2022,0
 ```
 
 ## Building locally and contributing
