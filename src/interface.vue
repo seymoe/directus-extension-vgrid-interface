@@ -38,7 +38,7 @@ import Papa from 'papaparse'
 export default defineComponent({
 	props: {
 		value: {
-			type: [String, Array],
+			type: [String, Array, Object],
 			default: null
 		},
 		columns: {
@@ -96,6 +96,8 @@ export default defineComponent({
     // charts
     const chartEl = ref()
     const chart = ref()
+    // json format type
+    const jsonFormat = ref('')
 
     if (props.type === 'json') {
       watch(() => props.columns,
@@ -184,14 +186,52 @@ export default defineComponent({
             }
           } else if (props.type === 'json') {
             try {
-              const list = JSON.parse(val)
+              const _val = JSON.parse(val)
+              let list = []
+              if (Array.isArray(_val)) {
+                list = _val
+                jsonFormat.value = 'array'
+              } else if (_val && Object.keys(_val).length) {
+                let keys = Object.keys(_val)
+                let rowLen = _val[keys[0]]['length']
+                for (let i = 0; i < rowLen; i++) {
+                  let o = {}
+                  for (let j = 0; j < keys.length; j++) {
+                    let k = keys[j]
+                    o[k] = _val[k][i]
+                  }
+                  list.push(o)
+                }
+                jsonFormat.value = 'object'
+              } else {
+                jsonFormat.value = 'array'
+              }
               dataList.value = list || []
             } catch (err) {
               console.log(err)
             }
           }
         } else {
-          dataList.value = val === null ? [] : val
+          let list = []
+          if (Array.isArray(val)) {
+            list = val
+            jsonFormat.value = 'array'
+          } else if (val && Object.keys(val).length) {
+            let keys = Object.keys(val)
+            let rowLen = val[keys[0]]['length']
+            for (let i = 0; i < rowLen; i++) {
+              let o = {}
+              for (let j = 0; j < keys.length; j++) {
+                let k = keys[j]
+                o[k] = val[k][i]
+              }
+              list.push(o)
+            }
+            jsonFormat.value = 'object'
+          } else {
+            jsonFormat.value = 'array'
+          }
+          dataList.value = list
         }
         setupChart(props.chartOptions)
       },
@@ -235,7 +275,19 @@ export default defineComponent({
     // update table data
     function emitTableData(data) {
       if (props.type === 'json') {
-        emit('input', JSON.stringify(data))
+        if (jsonFormat.value === 'array') {
+          emit('input', JSON.stringify(data))
+        } else if (jsonFormat.value === 'object') {
+          let _data = {}
+          columnList.value.map(c => {
+            _data[c.prop] = []
+            data.forEach(row => {
+              _data[c.prop].push(row[c.prop])
+            })
+          })
+          delete _data.$$_action
+          emit('input', JSON.stringify(_data))
+        }
       } else if (props.type === 'text') {
         const csv = Papa.unparse(data, { header: true, skipEmptyLines: true })
         emit('input', csv)
