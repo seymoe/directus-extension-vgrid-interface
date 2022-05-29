@@ -14,6 +14,7 @@
         :columnTypes="columnTypes"
         @beforeeditstart="onBeforeEditStart"
         @focusout="onAfterEdit"
+        @afteredit="onAfterEdit"
         @beforeaange="onBeforeRange"
       ></v-grid>
     </div>
@@ -108,6 +109,7 @@ export default defineComponent({
               prop: '$$_action',
               name: 'Actions',
               pin: 'colPinEnd',
+              readonly: true,
               cellTemplate: (createElement, _props) => {
                 return createElement('span', {
                   style: {
@@ -161,6 +163,7 @@ export default defineComponent({
                     prop: '$$_action',
                     name: 'Actions',
                     pin: 'colPinEnd',
+                    readonly: true,
                     cellTemplate: (createElement, _props) => {
                       return createElement('span', {
                         style: {
