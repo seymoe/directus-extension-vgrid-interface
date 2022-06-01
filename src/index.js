@@ -55,7 +55,7 @@ export default {
           interface: 'input-code'
         },
         schema: {
-          default_value: JSON.stringify({
+          default_value: {
             chart: {
               height: 350
             },
@@ -72,7 +72,7 @@ export default {
             yaxis: {
               min: 0
             }      
-          }, null, 4)
+          }
         }
       }
     ]
@@ -87,7 +87,7 @@ export default {
             interface: 'input-code'
           },
           schema: {
-            default_value: JSON.stringify([
+            default_value: [
               {
                 prop: 'time',
                 name: 'Time'
@@ -101,7 +101,7 @@ export default {
                 prop: 'name',
                 name: 'Name'
               }
-            ], null, 4)
+            ]
           }
         }
 			],
