@@ -1,7 +1,20 @@
 <template>
 	<div class="extension-fixtable-wrapper">
     <div class="toolbar" v-if="!fixedTable">
-      <v-button @click="addRow">Add Row</v-button>
+      <v-button small @click="addRow">Add Row</v-button>
+      <div class="right">
+        <v-button @click="doExport" kind="info" small>Export</v-button>
+        <div class="btn-import">
+          <v-button kind="info" small>Import CSV</v-button>
+          <input
+            id="import-csv-file"
+            ref="fileInput"
+            type="file"
+            accept="text/csv"
+            @change="doImport"
+          />
+        </div>
+      </div>
     </div>
     <div class="table-wrap" :style="{height: `${tableHeight}px`}">
       <v-grid
@@ -50,7 +63,7 @@ export default defineComponent({
 		},
     field: {
       type: String,
-      defualt: ''
+      default: ''
     },
     type: {
       type: String,
@@ -148,42 +161,12 @@ export default defineComponent({
         if (typeof val === 'string') {
           if (props.type === 'text') {
             try {
-              const { data, meta } = Papa.parse(val, {header: true, skipEmptyLines: true})
-              if (meta?.fields.length) {
-                const columns = meta.fields.map(field => {
-                  return {
-                    prop: field,
-                    name: field,
-                    autoSize: true
-                  }
-                })
-                // 如果 props.fixedTable 为 false，则添加内置列
-                if (!props.fixedTable && !columns.find(item => item.prop === '$$_action')) {
-                  columns.push({
-                    prop: '$$_action',
-                    name: 'Actions',
-                    pin: 'colPinEnd',
-                    readonly: true,
-                    cellTemplate: (createElement, _props) => {
-                      return createElement('span', {
-                        style: {
-                          color: 'red'
-                        },
-                        onClick: () => {
-                          let rows = dataList.value
-                          rows.splice(_props.rowIndex, 1)
-                          rows.forEach(row => {
-                            delete row.$$_action
-                          })
-                          emitTableData(rows)
-                        }
-                      }, 'Remove');
-                    }
-                  })
-                }
-                columnList.value = columns
-              }
-              dataList.value = data || []
+              const { data, meta } = Papa.parse(val, {
+                header: true,
+                skipEmptyLines: true,
+                dynamicTyping: true
+              })
+              setTableFromCsvData(data, meta)
             } catch (err) {
               console.log(err)
             }
@@ -240,6 +223,44 @@ export default defineComponent({
       },
       { immediate: true, deep: true }
     )
+
+    function setTableFromCsvData(data, meta) {
+      if (meta?.fields.length) {
+        const columns = meta.fields.map(field => {
+          return {
+            prop: field,
+            name: field,
+            autoSize: true
+          }
+        })
+        // 如果 props.fixedTable 为 false，则添加内置列
+        if (!props.fixedTable && !columns.find(item => item.prop === '$$_action')) {
+          columns.push({
+            prop: '$$_action',
+            name: 'Actions',
+            pin: 'colPinEnd',
+            readonly: true,
+            cellTemplate: (createElement, _props) => {
+              return createElement('span', {
+                style: {
+                  color: 'red'
+                },
+                onClick: () => {
+                  let rows = dataList.value
+                  rows.splice(_props.rowIndex, 1)
+                  rows.forEach(row => {
+                    delete row.$$_action
+                  })
+                  emitTableData(rows)
+                }
+              }, 'Remove');
+            }
+          })
+        }
+        columnList.value = columns
+      }
+      dataList.value = data || []
+    }
 
     // table callbacks
     const onBeforeEditStart = (e) => {
@@ -336,6 +357,39 @@ export default defineComponent({
       })
     }
 
+    function doExport() {
+      let tableData = dataList.value.map(item => {
+        const o = item
+        delete o.$$_action
+        return o
+      })
+      const csv = Papa.unparse(tableData)
+      console.log('export csv content: ', csv)
+      const aNode = document.createElement('a')
+      aNode.href = `data:text/csv;charset=utf-8,\ufeff${csv}`
+      aNode.download = `${props.field}_${Date.now()}.csv`
+      aNode.click()
+    }
+
+    function doImport(event) {
+      const files = event.target?.files
+      let file = files[0] || null
+      if (!file) return
+      console.log('File Object', file)
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: true,
+        complete: function(results) {
+          console.log("File Parsing complete:", results);
+          setTableFromCsvData(results.data || [], results.meta || { fields: [] })
+          setTimeout(() => {
+            emitTableData(dataList.value)
+          }, 300)
+        }
+      })
+    }
+
     onMounted(() => {
       setupChart(props.chartOptions)
     })
@@ -343,14 +397,32 @@ export default defineComponent({
 			chart.value?.destroy()
 		})
 
-		return { columnTypes, dataList, columnList, vgrid, onBeforeEditStart, onAfterEdit, onBeforeRange, addRow, chartEl };
+		return { columnTypes, dataList, columnList, vgrid, onBeforeEditStart, onAfterEdit, onBeforeRange, addRow, chartEl, doExport, doImport };
 	}
 });
 </script>
 
 <style scoped>
 .toolbar{
+  display: flex;
+  justify-content: space-between;
   margin-bottom: 15px;
+}
+.toolbar .right{
+  display: flex;
+  align-items: center;
+}
+.toolbar .btn-import{
+  position: relative;
+  margin-left: 15px;
+}
+.toolbar .btn-import #import-csv-file{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
 }
 .table-wrap{
   margin-bottom: 15px;
