@@ -47,6 +47,18 @@ export default {
         }
       },
       {
+        field: 'importExport',
+        name: 'Import Export',
+        type: 'boolean',
+        meta: {
+          width: 'half',
+          interface: 'boolean'
+        },
+        schema: {
+          default_value: true
+        }
+      },
+      {
         field: 'chartOptions',
         name: 'Chart Options',
         type: 'json',

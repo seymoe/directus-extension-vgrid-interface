@@ -2,7 +2,7 @@
 	<div class="extension-fixtable-wrapper">
     <div class="toolbar" v-if="!fixedTable">
       <v-button small @click="addRow">Add Row</v-button>
-      <div class="right">
+      <div class="right" v-if="importExport">
         <v-button @click="doExport" kind="info" small>Export</v-button>
         <div class="btn-import">
           <v-button kind="info" small>Import CSV</v-button>
@@ -81,6 +81,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    importExport: {
+      type: Boolean,
+      default: true
+    },
     chartOptions: {
 			type: Object,
 			default: () => {
@@ -112,6 +116,7 @@ export default defineComponent({
     const chart = ref()
     // json format type
     const jsonFormat = ref('')
+    const shouldInitEmit = ref(true)
 
     if (props.type === 'json') {
       watch(() => props.columns,
@@ -218,6 +223,11 @@ export default defineComponent({
             jsonFormat.value = 'array'
           }
           dataList.value = list
+          if (shouldInitEmit.value) {
+            console.log('更新数据！！！', dataList.value)
+            emitTableData(dataList.value)
+            shouldInitEmit.value = false
+          }
         }
         setupChart(props.chartOptions)
       },
